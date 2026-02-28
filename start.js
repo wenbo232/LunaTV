@@ -1,3 +1,4 @@
+Dockerfile
 #!/usr/bin/env node
 
 /* eslint-disable no-console,@typescript-eslint/no-var-requires */
@@ -31,6 +32,7 @@ const DISABLE_CRON = process.env.DISABLE_CRON === 'true';
 
 if (DISABLE_CRON) {
   console.log('⚠️  Cron job is DISABLED via DISABLE_CRON environment variable');
+  console.log('✅ Server is running with cron disabled');
 } else {
   // 每 1 秒轮询一次，直到请求成功
   const TARGET_URL = `http://${process.env.HOSTNAME || 'localhost'}:${process.env.PORT || 3000
@@ -55,6 +57,11 @@ if (DISABLE_CRON) {
           executeCronJob();
         }, 60 * 60 * 1000); // 每小时执行一次
       }
+    });
+
+    req.on('error', (err) => {
+      // 忽略连接错误，继续轮询
+      console.log('Waiting for server to be ready...');
     });
 
     req.setTimeout(2000, () => {
